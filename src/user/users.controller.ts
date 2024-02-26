@@ -30,7 +30,7 @@ export class UserController {
     return this.userService.addOneItem(userId, productId);
   }
 
-  @Put('add/:userId/:productId/:quantity')
+  @Put('edit/:userId/:productId/:quantity')
   async editItems(
     @Param('userId') userId: string,
     @Param('productId') productId: string,
