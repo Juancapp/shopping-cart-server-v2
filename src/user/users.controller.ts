@@ -22,7 +22,7 @@ export class UserController {
     return this.userService.getUser(name);
   }
 
-  @Patch('addOne/:userId/:productId')
+  @Get('addOne/:userId/:productId')
   async addOneItem(
     @Param('userId') userId: string,
     @Param('productId') productId: string,
@@ -47,7 +47,7 @@ export class UserController {
     return this.userService.removeOneItem(userId, productId);
   }
 
-  @Patch('removeAll/:userId/:productId')
+  @Get('removeAll/:userId/:productId')
   async removeAllItems(
     @Param('userId') userId: string,
     @Param('productId') productId: string,
