@@ -17,7 +17,13 @@ async function bootstrap() {
     origin: (origin: any, cb: (arg0: null, arg1: boolean) => any) =>
       cb(null, true),
     methods: ['GET', 'POST', 'PATCH', 'DELETE', 'PUT', 'OPTIONS'],
-    allowedHeaders: ['Content-Type', 'Authorization', 'Accept'],
+    allowedHeaders: [
+      'Origin',
+      'X-Requested-With',
+      'Accept',
+      'Content-Type',
+      'Authorization',
+    ],
   });
 
   await app.listen(process.env.PORT || 8080, '0.0.0.0');
