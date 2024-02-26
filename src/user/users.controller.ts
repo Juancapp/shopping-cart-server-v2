@@ -1,4 +1,4 @@
-import { Body, Controller, Post, Get, Param, Patch } from '@nestjs/common';
+import { Body, Controller, Post, Get, Param, Put, Patch } from '@nestjs/common';
 import { UserService } from './user.service';
 import { User } from './user.schema';
 
@@ -22,7 +22,7 @@ export class UserController {
     return this.userService.getUser(name);
   }
 
-  @Get('addOne/:userId/:productId')
+  @Put('addOne/:userId/:productId')
   async addOneItem(
     @Param('userId') userId: string,
     @Param('productId') productId: string,
@@ -47,7 +47,7 @@ export class UserController {
     return this.userService.removeOneItem(userId, productId);
   }
 
-  @Get('removeAll/:userId/:productId')
+  @Put('removeAll/:userId/:productId')
   async removeAllItems(
     @Param('userId') userId: string,
     @Param('productId') productId: string,
