@@ -39,7 +39,7 @@ export class UserController {
     return this.userService.editItems(userId, productId, parseInt(quantity));
   }
 
-  @Put('remove/:userId/:productId')
+  @Put('removeOne/:userId/:productId')
   async removeOneItem(
     @Param('userId') userId: string,
     @Param('productId') productId: string,
