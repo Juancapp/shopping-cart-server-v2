@@ -14,16 +14,10 @@ async function bootstrap() {
   );
 
   app.register(fastifyCors, {
-    origin: (origin: any, cb: (arg0: null, arg1: boolean) => any) =>
-      cb(null, true),
+    origin: true,
     methods: ['GET', 'POST', 'PATCH', 'DELETE', 'PUT', 'OPTIONS'],
-    allowedHeaders: [
-      'Origin',
-      'X-Requested-With',
-      'Accept',
-      'Content-Type',
-      'Authorization',
-    ],
+    allowedHeaders: '*',
+    credentials: true,
   });
 
   await app.listen(process.env.PORT || 8080, '0.0.0.0');
