@@ -50,12 +50,13 @@ export class UserService {
       });
   }
 
-  async addItems(
+  async editItems(
     userId: string,
     productId: string,
     quantity: number,
   ): Promise<User> {
     if (quantity === 1) return this.addOneItem(userId, productId);
+    if (quantity === 0) return this.removeAllItems(userId, productId);
 
     return this.userModel
       .findOne({ _id: userId, 'products.product': productId })

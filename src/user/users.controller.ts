@@ -1,4 +1,4 @@
-import { Body, Controller, Post, Get, Param, Put, Patch } from '@nestjs/common';
+import { Body, Controller, Post, Get, Param, Put } from '@nestjs/common';
 import { UserService } from './user.service';
 import { User } from './user.schema';
 
@@ -30,16 +30,16 @@ export class UserController {
     return this.userService.addOneItem(userId, productId);
   }
 
-  @Patch('add/:userId/:productId/:quantity')
-  async addItems(
+  @Put('add/:userId/:productId/:quantity')
+  async editItems(
     @Param('userId') userId: string,
     @Param('productId') productId: string,
     @Param('quantity') quantity: string,
   ): Promise<User> {
-    return this.userService.addItems(userId, productId, parseInt(quantity));
+    return this.userService.editItems(userId, productId, parseInt(quantity));
   }
 
-  @Patch('remove/:userId/:productId')
+  @Put('remove/:userId/:productId')
   async removeOneItem(
     @Param('userId') userId: string,
     @Param('productId') productId: string,
