@@ -2,6 +2,8 @@ import { Injectable } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import mongoose from 'mongoose';
 import { User } from './user.schema';
+import { S3 } from 'aws-sdk';
+import { Base64 } from 'aws-sdk/clients/ecr';
 
 @Injectable()
 export class UserService {
@@ -35,33 +37,27 @@ export class UserService {
     productId: string,
     quantity: number,
   ): Promise<User> {
-    if (quantity === 1) return this.addOneItem(userId, productId);
-    if (quantity === 0) return this.removeAllItems(userId, productId);
+    try {
+      if (quantity === 0) return this.removeOneItem(userId, productId);
 
-    return this.userModel
-      .findOne({ _id: userId, 'products.product': productId })
-      .exec()
-      .then((user) => {
-        if (user) {
-          return this.userModel
-            .findOneAndUpdate(
-              { _id: userId, 'products.product': productId },
-              { $set: { 'products.$.quantity': quantity } },
-              { new: true },
-            )
-            .exec();
-        } else {
-          return this.userModel
-            .findOneAndUpdate(
-              { _id: userId },
-              {
-                $push: { products: { product: productId, quantity: quantity } },
-              },
-              { new: true },
-            )
-            .exec();
-        }
-      });
+      const user = await this.userModel
+        .findOneAndUpdate(
+          { _id: userId, 'products.product': productId },
+          { $set: { 'products.$.quantity': quantity } },
+          { new: true },
+        )
+        .exec();
+
+      if (user) {
+        return user;
+      } else {
+        throw new Error(
+          `No se encontró un usuario con el ID ${userId} y el producto ID ${productId}`,
+        );
+      }
+    } catch (error) {
+      throw new Error(`Error al actualizar el producto: ${error.message}`);
+    }
   }
 
   async addOneItem(userId: string, productId: string): Promise<User> {
@@ -117,5 +113,37 @@ export class UserService {
         { new: true },
       )
       .exec();
+  }
+
+  async uploadPicture(
+    bucketName: string,
+    key: string,
+    file_in_base64_string: Base64,
+  ) {
+    const region = process.env.AWS_BUCKET_REGION;
+    const accessKey = process.env.AWS_ACCESS_KEY;
+    const secretKey = process.env.AWS_SECRET_KEY;
+
+    try {
+      const s3 = new S3({
+        region: region,
+        accessKeyId: accessKey,
+        secretAccessKey: secretKey,
+      });
+
+      const base64Data = Buffer.from(file_in_base64_string, 'base64');
+
+      const params = {
+        Bucket: bucketName,
+        Key: key,
+        Body: base64Data,
+        ContentEncoding: 'base64',
+        ContentType: 'image/jpeg',
+      };
+
+      return await s3.upload(params).promise();
+    } catch (error) {
+      throw error;
+    }
   }
 }

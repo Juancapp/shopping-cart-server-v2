@@ -54,4 +54,15 @@ export class UserController {
   ): Promise<User> {
     return this.userService.removeAllItems(userId, productId);
   }
+
+  @Post('/picture')
+  async uploadPicture(@Body() data: { userId: number; img: string }) {
+    const tmp = await this.userService.uploadPicture(
+      process.env.S3_BUCKET_NAME,
+      `profile_image/${data.userId}.jpg`,
+      data.img,
+    );
+    const photo_url = tmp.Location;
+    return photo_url;
+  }
 }
