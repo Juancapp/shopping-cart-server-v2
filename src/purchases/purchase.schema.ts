@@ -21,6 +21,9 @@ export class Purchase {
 
   @Prop()
   status: Status;
+
+  @Prop()
+  createdAt: string;
 }
 
 export const PurchaseSchema = SchemaFactory.createForClass(Purchase);

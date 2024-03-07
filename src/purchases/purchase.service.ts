@@ -1,12 +1,20 @@
-import { Injectable, MethodNotAllowedException } from '@nestjs/common';
+import { Injectable, Logger, MethodNotAllowedException } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import mongoose from 'mongoose';
 import { Purchase } from './purchase.schema';
 import { Status } from './purchase.entity';
 import { User } from 'src/user/user.schema';
+// import { Cron } from '@nestjs/schedule';
 
 @Injectable()
 export class PurchaseService {
+  private readonly logger = new Logger(PurchaseService.name);
+
+  // @Cron('* */30 * * * *')
+  // handleCron() {
+  //   this.logger.log('Called every 30 seconds');
+  // }
+
   constructor(
     @InjectModel(Purchase.name)
     private purchaseSchema: mongoose.Model<Purchase>,
@@ -43,8 +51,10 @@ export class PurchaseService {
   }
 
   async getPurchasesByUserId(userId: string): Promise<Purchase[]> {
-    const res = this.purchaseSchema.find({ user: userId });
-    return res;
+    const res = await this.purchaseSchema.find({ user: userId });
+    return res.sort((a: Purchase, b: Purchase) =>
+      a.status.localeCompare(b.status),
+    );
   }
 
   async cancelPurchase(purchaseId: string) {
@@ -62,4 +72,6 @@ export class PurchaseService {
 
     return deletedPurchase;
   }
+
+  async setToSuccess() {}
 }

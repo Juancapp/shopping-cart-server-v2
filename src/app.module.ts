@@ -6,6 +6,7 @@ import { AppController } from './app.controller';
 import { AppService } from './app.service';
 import { UserModule } from './user/user.module';
 import { PurchaseModule } from './purchases/purchase.module';
+import { ScheduleModule } from '@nestjs/schedule';
 
 @Module({
   imports: [
@@ -14,6 +15,7 @@ import { PurchaseModule } from './purchases/purchase.module';
       isGlobal: true,
     }),
     MongooseModule.forRoot(process.env.DB_URI),
+    ScheduleModule.forRoot(),
     ProductsModule,
     UserModule,
     PurchaseModule,
