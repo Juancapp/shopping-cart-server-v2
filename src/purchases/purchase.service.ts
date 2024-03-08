@@ -5,6 +5,7 @@ import { Purchase } from './purchase.schema';
 import { Status } from './purchase.entity';
 import { User } from 'src/user/user.schema';
 import { Cron } from '@nestjs/schedule';
+import moment from 'moment-timezone';
 
 @Injectable()
 export class PurchaseService {
@@ -63,13 +64,13 @@ export class PurchaseService {
 
   async setPurchaseToSuccess() {
     try {
-      const currentDate = new Date();
-      currentDate.setMinutes(currentDate.getMinutes() - 30);
+      const currentDate = moment().tz('America/Montevideo');
+      currentDate.subtract(30, 'minutes');
 
       await this.purchaseSchema.updateMany(
         {
           createdAt: {
-            $lt: currentDate,
+            $lt: currentDate.toDate(),
           },
         },
         { $set: { status: Status.SUCCESS } },
