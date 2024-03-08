@@ -12,6 +12,7 @@ async function bootstrap() {
     new FastifyAdapter(),
     { bodyParser: false },
   );
+  app.register(FastifyFormBody as any);
   await app.init();
   app.enableCors();
   await app.listen(process.env.PORT || 8080, '0.0.0.0');
