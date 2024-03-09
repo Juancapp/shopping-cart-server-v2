@@ -1,16 +1,13 @@
-import { Injectable, Logger, MethodNotAllowedException } from '@nestjs/common';
+import { Injectable, MethodNotAllowedException } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import mongoose from 'mongoose';
 import { Purchase } from './purchase.schema';
 import { Status } from './purchase.entity';
 import { User } from 'src/user/user.schema';
 import { Cron } from '@nestjs/schedule';
-import moment from 'moment-timezone';
 
 @Injectable()
 export class PurchaseService {
-  private readonly logger = new Logger(PurchaseService.name);
-
   @Cron('0 * * * * *')
   handleCron() {
     this.setPurchaseToSuccess();
@@ -63,22 +60,32 @@ export class PurchaseService {
   }
 
   async setPurchaseToSuccess() {
-    try {
-      const currentDate = moment().tz('America/Montevideo');
-      currentDate.subtract(30, 'minutes');
+    const foundPurchases = await this.purchaseSchema.find({
+      status: Status.PENDING,
+    });
 
-      await this.purchaseSchema.updateMany(
-        {
-          createdAt: {
-            $lt: currentDate.toDate(),
-          },
-        },
-        { $set: { status: Status.SUCCESS } },
-      );
+    const promises = [];
 
-      return;
-    } catch (error) {
-      return error;
+    for (let i = 0; i < foundPurchases.length; i++) {
+      const difference =
+        (new Date().getTime() -
+          new Date(foundPurchases[i].createdAt).getTime()) /
+        60000;
+
+      if (difference > 30) {
+        promises.push(
+          await this.purchaseSchema.findOneAndUpdate(
+            { _id: foundPurchases[i]._id },
+            { $set: { status: Status.SUCCESS } },
+          ),
+        );
+      }
     }
+
+    if (promises.length) {
+      await Promise.all(promises);
+    }
+
+    return;
   }
 }

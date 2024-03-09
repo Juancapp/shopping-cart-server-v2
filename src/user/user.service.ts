@@ -4,6 +4,7 @@ import mongoose from 'mongoose';
 import { User } from './user.schema';
 import { S3 } from 'aws-sdk';
 import { Base64 } from 'aws-sdk/clients/ecr';
+import { FirstTime } from './user.entity';
 
 @Injectable()
 export class UserService {
@@ -13,8 +14,16 @@ export class UserService {
   ) {}
 
   async createUser(user: User): Promise<User> {
-    const response = await this.userModel.create(user);
+    const response = await this.userModel.create({
+      ...user,
+      firstTime: FirstTime.FALSE,
+    });
     return response;
+  }
+
+  async editUser(userId: string, body: Partial<User>): Promise<User> {
+    const res = await this.userModel.findByIdAndUpdate(userId, body);
+    return res;
   }
 
   async getUser(name: string): Promise<User> {

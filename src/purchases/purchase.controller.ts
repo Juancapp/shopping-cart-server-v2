@@ -6,12 +6,17 @@ import { Purchase } from './purchase.schema';
 export class PurchaseController {
   constructor(private purchaseService: PurchaseService) {}
 
+  @Get()
+  async getPurchases() {
+    return await this.purchaseService.setPurchaseToSuccess();
+  }
+
   @Get(':userId')
   async getPurchaseByUserId(
     @Param('userId')
     id: string,
   ) {
-    return this.purchaseService.getPurchasesByUserId(id);
+    return await this.purchaseService.getPurchasesByUserId(id);
   }
 
   @Post()
@@ -19,7 +24,7 @@ export class PurchaseController {
     @Body()
     purchase,
   ): Promise<Purchase> {
-    return this.purchaseService.createPurchase(purchase);
+    return await this.purchaseService.createPurchase(purchase);
   }
 
   @Delete(':id')
@@ -27,6 +32,6 @@ export class PurchaseController {
     @Param('id')
     purchaseId,
   ) {
-    return this.purchaseService.cancelPurchase(purchaseId);
+    return await this.purchaseService.cancelPurchase(purchaseId);
   }
 }

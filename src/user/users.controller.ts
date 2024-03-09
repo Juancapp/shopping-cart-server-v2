@@ -1,4 +1,4 @@
-import { Body, Controller, Post, Get, Param, Put } from '@nestjs/common';
+import { Body, Controller, Post, Get, Param, Put, Patch } from '@nestjs/common';
 import { UserService } from './user.service';
 import { User } from './user.schema';
 
@@ -12,6 +12,16 @@ export class UserController {
     user,
   ): Promise<User> {
     return this.userService.createUser(user);
+  }
+
+  @Patch('/:id')
+  async editUser(
+    @Param('id')
+    id,
+    @Body()
+    body,
+  ) {
+    return this.userService.editUser(id, body);
   }
 
   @Get(':userName')
