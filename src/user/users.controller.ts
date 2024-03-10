@@ -65,6 +65,15 @@ export class UserController {
     return this.userService.removeAllItems(userId, productId);
   }
 
+  @Put('buyItem/:userId/:productId/:quantity')
+  async buyItem(
+    @Param('userId') userId: string,
+    @Param('productId') productId: string,
+    @Param('quantity') quantity: number,
+  ) {
+    return this.userService.buyItem(userId, productId, quantity);
+  }
+
   @Post('/picture')
   async uploadPicture(@Body() data: { userId: number; img: string }) {
     const tmp = await this.userService.uploadPicture(

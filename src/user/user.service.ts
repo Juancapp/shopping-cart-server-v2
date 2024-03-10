@@ -14,6 +14,11 @@ export class UserService {
   ) {}
 
   async createUser(user: User): Promise<User> {
+    console.log({
+      ...user,
+      firstTime: FirstTime.FALSE,
+    });
+
     const response = await this.userModel.create({
       ...user,
       firstTime: FirstTime.FALSE,
@@ -36,7 +41,10 @@ export class UserService {
     if (user) {
       return user;
     } else {
-      const createdUser = await this.userModel.create({ name: name });
+      const createdUser = await this.userModel.create({
+        name: name,
+        firstTime: FirstTime.TRUE,
+      });
       return createdUser;
     }
   }
@@ -122,6 +130,30 @@ export class UserService {
         { new: true },
       )
       .exec();
+  }
+
+  async buyItem(
+    userId: string,
+    productId: string,
+    quantity: number,
+  ): Promise<User> {
+    return this.userModel
+      .findOneAndUpdate(
+        { _id: userId, 'products.product': { $ne: productId } },
+        { $push: { products: { product: productId, quantity: quantity } } },
+        { new: true },
+      )
+      .exec()
+      .then((user) => {
+        if (user) return user;
+        return this.userModel
+          .findOneAndUpdate(
+            { _id: userId, 'products.product': productId },
+            { $inc: { 'products.$.quantity': quantity } },
+            { new: true },
+          )
+          .exec();
+      });
   }
 
   async uploadPicture(
