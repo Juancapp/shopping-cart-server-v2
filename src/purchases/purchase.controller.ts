@@ -1,4 +1,12 @@
-import { Body, Controller, Delete, Get, Param, Post } from '@nestjs/common';
+import {
+  Body,
+  Controller,
+  Delete,
+  Get,
+  Param,
+  Post,
+  Query,
+} from '@nestjs/common';
 import { PurchaseService } from './purchase.service';
 import { Purchase } from './purchase.schema';
 
@@ -12,11 +20,13 @@ export class PurchaseController {
   }
 
   @Get(':userId')
-  async getPurchaseByUserId(
+  async getPurchasesByUserId(
+    @Query() query,
+
     @Param('userId')
     id: string,
   ) {
-    return await this.purchaseService.getPurchasesByUserId(id);
+    return await this.purchaseService.getPurchasesByUserId(query, id);
   }
 
   @Post()

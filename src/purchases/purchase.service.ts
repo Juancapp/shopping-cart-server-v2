@@ -35,12 +35,36 @@ export class PurchaseService {
     return res;
   }
 
-  async getPurchasesByUserId(userId: string): Promise<Purchase[]> {
-    const res = await this.purchaseSchema.find({ user: userId });
+  async getPurchasesByUserId(
+    query = {} as Record<string, never>,
+    userId: string,
+  ): Promise<{
+    nextPage: number;
+    totalPages: number;
+    purchases: Purchase[];
+  }> {
+    if (!userId) {
+      throw new Error('Not user');
+    }
 
-    return res.sort((a: Purchase, b: Purchase) =>
-      a.status.localeCompare(b.status),
-    );
+    const resPerPage = 5;
+    const currentPage = 'page' in query ? Number(query.page) : 1;
+    const skip = resPerPage * (currentPage - 1);
+
+    const res = await this.purchaseSchema
+      .find({ user: userId })
+      .sort({ createdAt: -1 })
+      .limit(resPerPage)
+      .skip(skip);
+
+    const totalProducts = await this.purchaseSchema.countDocuments();
+
+    return {
+      nextPage:
+        currentPage < totalProducts / resPerPage ? currentPage + 1 : undefined,
+      totalPages: Math.ceil(totalProducts / resPerPage),
+      purchases: res,
+    };
   }
 
   async cancelPurchase(purchaseId: string) {
