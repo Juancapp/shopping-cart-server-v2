@@ -24,13 +24,17 @@ export class PurchaseService {
   async createPurchase(purchase: Purchase): Promise<Purchase> {
     const res = await this.purchaseSchema.create(purchase);
 
-    await this.userSchema.findByIdAndUpdate(
+    const user = await this.userSchema.findByIdAndUpdate(
       {
         _id: res?.user,
       },
       { $set: { products: [] } },
       { new: true },
     );
+
+    if (!user) {
+      throw new Error('User was not found');
+    }
 
     return res;
   }
@@ -83,6 +87,18 @@ export class PurchaseService {
     return deletedPurchase;
   }
 
+  async editPurchase(purchaseId: string, purchase: { status: Status }) {
+    const foundPurchase = await this.purchaseSchema.findByIdAndUpdate(
+      purchaseId,
+      {
+        $set: { status: purchase.status },
+      },
+      { new: true },
+    );
+
+    return foundPurchase;
+  }
+
   async setPurchaseToSuccess() {
     const foundPurchases = await this.purchaseSchema.find({
       status: Status.PENDING,
@@ -109,7 +125,5 @@ export class PurchaseService {
     if (promises.length) {
       await Promise.all(promises);
     }
-
-    return;
   }
 }

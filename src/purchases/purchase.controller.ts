@@ -4,6 +4,7 @@ import {
   Delete,
   Get,
   Param,
+  Patch,
   Post,
   Query,
 } from '@nestjs/common';
@@ -35,6 +36,17 @@ export class PurchaseController {
     purchase,
   ): Promise<Purchase> {
     return await this.purchaseService.createPurchase(purchase);
+  }
+
+  @Patch('/:id')
+  async editPurchase(
+    @Param('id')
+    purchaseId,
+
+    @Body()
+    purchase,
+  ): Promise<Purchase> {
+    return await this.purchaseService.editPurchase(purchaseId, purchase);
   }
 
   @Delete(':id')

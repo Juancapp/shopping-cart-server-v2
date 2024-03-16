@@ -14,11 +14,6 @@ export class UserService {
   ) {}
 
   async createUser(user: User): Promise<User> {
-    console.log({
-      ...user,
-      firstTime: FirstTime.FALSE,
-    });
-
     const response = await this.userModel.create({
       ...user,
       firstTime: FirstTime.FALSE,
@@ -41,10 +36,18 @@ export class UserService {
     if (user) {
       return user;
     } else {
+      const regExp = /^[a-zA-Z]+$/;
+      if (!regExp.test(name) || name.length < 3) {
+        throw new Error(
+          'All characters must be letters and name must be equal or greater than 3',
+        );
+      }
+
       const createdUser = await this.userModel.create({
         name: name,
         firstTime: FirstTime.TRUE,
       });
+
       return createdUser;
     }
   }
@@ -55,6 +58,7 @@ export class UserService {
     quantity: number,
   ): Promise<User> {
     try {
+      if (quantity < 0) throw new Error('Quantity must be greater than 0');
       if (quantity === 0) return this.removeOneItem(userId, productId);
 
       const user = await this.userModel
@@ -69,11 +73,11 @@ export class UserService {
         return user;
       } else {
         throw new Error(
-          `No se encontró un usuario con el ID ${userId} y el producto ID ${productId}`,
+          `User with ${userId} and product id ${productId} not found`,
         );
       }
     } catch (error) {
-      throw new Error(`Error al actualizar el producto: ${error.message}`);
+      throw new Error(`Error updating the product: ${error.message}`);
     }
   }
 
