@@ -1,6 +1,7 @@
 import { Body, Controller, Post, Get, Param, Put, Patch } from '@nestjs/common';
 import { UserService } from './user.service';
 import { User } from './user.schema';
+import { PaymentMethod } from './user.entity';
 
 @Controller('user')
 export class UserController {
@@ -72,6 +73,30 @@ export class UserController {
     @Param('quantity') quantity: number,
   ) {
     return this.userService.buyItem(userId, productId, quantity);
+  }
+
+  @Put('payment/:userId')
+  async createPaymentMethod(
+    @Param('userId') userId: string,
+    @Body() body: PaymentMethod,
+  ) {
+    return this.userService.createPaymentMethod(userId, body);
+  }
+
+  @Put('paymentToDefault/:userId')
+  async setItemToDefault(
+    @Param('userId') userId: string,
+    @Body() body: { number: string },
+  ) {
+    return this.userService.setPaymentToDefault(userId, body.number);
+  }
+
+  @Put('removePaymentMethod/:userId')
+  async removePaymentMethod(
+    @Param('userId') userId: string,
+    @Body() body: { number: string },
+  ) {
+    return this.userService.removePaymentMethod(userId, body.number);
   }
 
   @Post('/picture')

@@ -15,6 +15,23 @@ export class User {
   @Prop({
     type: [
       {
+        number: { type: String },
+        expirationDate: { type: String },
+        cvc: { type: String },
+        isDefault: { type: Boolean },
+      },
+    ],
+  })
+  paymentMethods: {
+    number: string;
+    expirationDate: string;
+    cvc: string;
+    isDefault: boolean;
+  }[];
+
+  @Prop({
+    type: [
+      {
         quantity: { type: Number },
         product: { type: Types.ObjectId, ref: 'Product' },
       },

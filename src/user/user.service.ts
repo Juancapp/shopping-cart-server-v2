@@ -4,7 +4,7 @@ import mongoose from 'mongoose';
 import { User } from './user.schema';
 import { S3 } from 'aws-sdk';
 import { Base64 } from 'aws-sdk/clients/ecr';
-import { FirstTime } from './user.entity';
+import { FirstTime, PaymentMethod } from './user.entity';
 
 @Injectable()
 export class UserService {
@@ -24,6 +24,118 @@ export class UserService {
   async editUser(userId: string, body: Partial<User>): Promise<User> {
     const res = await this.userModel.findByIdAndUpdate(userId, body);
     return res;
+  }
+
+  async createPaymentMethod(
+    userId: string,
+    body: PaymentMethod,
+  ): Promise<User> {
+    try {
+      const foundUser = (await this.userModel.findById(userId)).toObject();
+
+      const paymentMethods = foundUser.paymentMethods;
+
+      if (paymentMethods.length) {
+        paymentMethods.forEach((paymentMethod, index) => {
+          if (paymentMethod.number === body.number) {
+            throw new Error('Same card already added');
+          } else {
+            if (body.isDefault && body.number !== paymentMethod.number) {
+              paymentMethods[index] = {
+                ...paymentMethods[index],
+                isDefault: false,
+              };
+            }
+          }
+        });
+        paymentMethods.push(body);
+      } else {
+        paymentMethods.push({ ...body, isDefault: true });
+      }
+
+      const res = await this.userModel.findByIdAndUpdate(
+        userId,
+        {
+          $set: { paymentMethods: paymentMethods },
+        },
+        {
+          new: true,
+        },
+      );
+
+      return res;
+    } catch (error) {
+      return error;
+    }
+  }
+
+  async setPaymentToDefault(userId: string, number: string): Promise<User> {
+    try {
+      const foundUser = (await this.userModel.findById(userId)).toObject();
+
+      const paymentMethods = foundUser.paymentMethods;
+
+      paymentMethods.forEach((paymentMethod, index) => {
+        if (paymentMethod.number === number && paymentMethod.isDefault) {
+          throw new Error('Payment method is already default');
+        } else {
+          paymentMethods[index] = {
+            ...paymentMethods[index],
+            isDefault: paymentMethod.number === number,
+          };
+        }
+      });
+
+      const res = await this.userModel.findByIdAndUpdate(
+        userId,
+        {
+          $set: { paymentMethods: paymentMethods },
+        },
+        {
+          new: true,
+        },
+      );
+
+      return res;
+    } catch (error) {
+      return error;
+    }
+  }
+
+  async removePaymentMethod(userId: string, number: string): Promise<User> {
+    try {
+      const foundUser = await this.userModel.findOne({
+        _id: userId,
+        'paymentMethods.number': number,
+      });
+
+      if (!foundUser) {
+        throw new Error('User not found');
+      }
+
+      const foundPM = foundUser.paymentMethods.some(
+        (paymentMethod) =>
+          paymentMethod.number === number && paymentMethod.isDefault,
+      );
+
+      if (foundPM) {
+        throw new Error('Default payment method can not be deleted');
+      }
+
+      return await this.userModel.findByIdAndUpdate(
+        userId,
+        {
+          $pull: {
+            paymentMethods: { number: number },
+          },
+        },
+        {
+          new: true,
+        },
+      );
+    } catch (error) {
+      return error;
+    }
   }
 
   async getUser(name: string): Promise<User> {
