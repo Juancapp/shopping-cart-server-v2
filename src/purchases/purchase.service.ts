@@ -22,20 +22,24 @@ export class PurchaseService {
   ) {}
 
   async createPurchase(purchase: Purchase): Promise<Purchase> {
-    const res = await this.purchaseSchema.create(purchase);
+    const foundUser = await this.userSchema.findById(purchase.user);
+    if (!foundUser.paymentMethods.length) {
+      throw new Error('User has not payment method');
+    }
 
-    const user = await this.userSchema.findByIdAndUpdate(
+    const updatedUser = await this.userSchema.findByIdAndUpdate(
       {
-        _id: res?.user,
+        _id: purchase.user,
       },
       { $set: { products: [] } },
       { new: true },
     );
 
-    if (!user) {
+    if (!updatedUser) {
       throw new Error('User was not found');
     }
 
+    const res = await this.purchaseSchema.create(purchase);
     return res;
   }
 
