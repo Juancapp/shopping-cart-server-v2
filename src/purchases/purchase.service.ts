@@ -10,7 +10,7 @@ import { Purchase } from './purchase.schema';
 import { Status } from './purchase.entity';
 import { User } from 'src/user/user.schema';
 import { Cron } from '@nestjs/schedule';
-import { isCardExpired } from 'src/helpers/api';
+import { isCardExpired } from '../helpers/api';
 
 @Injectable()
 export class PurchaseService {
