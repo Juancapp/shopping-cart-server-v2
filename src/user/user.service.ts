@@ -5,7 +5,6 @@ import { User } from './user.schema';
 import { S3 } from 'aws-sdk';
 import { Base64 } from 'aws-sdk/clients/ecr';
 import { FirstTime, PaymentMethod } from './user.entity';
-// import { isCardExpired } from '../helpers/api';
 
 @Injectable()
 export class UserService {
