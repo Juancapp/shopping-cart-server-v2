@@ -5,6 +5,7 @@ import { User } from './user.schema';
 import { S3 } from 'aws-sdk';
 import { Base64 } from 'aws-sdk/clients/ecr';
 import { FirstTime, PaymentMethod } from './user.entity';
+import { isCardExpired } from '../helpers/date';
 
 @Injectable()
 export class UserService {
@@ -73,12 +74,11 @@ export class UserService {
     userId: string,
     body: { number: string; expiryDate: string },
   ): Promise<User> {
-    // const { number, expiryDate } = body;
-    const { number } = body;
+    const { number, expiryDate } = body;
 
-    // if (isCardExpired(expiryDate)) {
-    //   throw new BadRequestException('You can not set expired card as default');
-    // }
+    if (isCardExpired(expiryDate)) {
+      throw new BadRequestException('You can not set expired card as default');
+    }
 
     const foundUser = (await this.userModel.findById(userId)).toObject();
 
