@@ -10,7 +10,7 @@ import { Purchase } from './purchase.schema';
 import { Status } from './purchase.entity';
 import { User } from 'src/user/user.schema';
 import { Cron } from '@nestjs/schedule';
-import { isCardExpired } from '../helpers/api';
+// import { isCardExpired } from '../helpers/api';
 
 @Injectable()
 export class PurchaseService {
@@ -37,11 +37,11 @@ export class PurchaseService {
       throw new BadRequestException('Invalid CVC');
     }
 
-    if (isCardExpired(foundDefaultPayment.expiryDate)) {
-      throw new BadRequestException(
-        'Credit card is expired, look at Payment Methods section',
-      );
-    }
+    // if (isCardExpired(foundDefaultPayment.expiryDate)) {
+    //   throw new BadRequestException(
+    //     'Credit card is expired, look at Payment Methods section',
+    //   );
+    // }
 
     if (!foundUser.paymentMethods.length) {
       throw new BadRequestException('User has not payment method');
