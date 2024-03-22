@@ -12,4 +12,5 @@ export class Purchase {
   totalQuantity: number;
   products: { quantity: number; product: Product }[];
   status: Status;
+  cardNumber: string;
 }

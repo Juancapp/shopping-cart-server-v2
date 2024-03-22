@@ -16,7 +16,7 @@ export class User {
     type: [
       {
         number: { type: String },
-        expirationDate: { type: String },
+        expiryDate: { type: String },
         cvc: { type: String },
         isDefault: { type: Boolean },
       },
@@ -24,7 +24,7 @@ export class User {
   })
   paymentMethods: {
     number: string;
-    expirationDate: string;
+    expiryDate: string;
     cvc: string;
     isDefault: boolean;
   }[];

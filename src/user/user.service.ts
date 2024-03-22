@@ -1,10 +1,11 @@
-import { Injectable } from '@nestjs/common';
+import { BadRequestException, Injectable } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import mongoose from 'mongoose';
 import { User } from './user.schema';
 import { S3 } from 'aws-sdk';
 import { Base64 } from 'aws-sdk/clients/ecr';
 import { FirstTime, PaymentMethod } from './user.entity';
+import { isCardExpired } from 'src/helpers/api';
 
 @Injectable()
 export class UserService {
@@ -69,37 +70,42 @@ export class UserService {
     }
   }
 
-  async setPaymentToDefault(userId: string, number: string): Promise<User> {
-    try {
-      const foundUser = (await this.userModel.findById(userId)).toObject();
+  async setPaymentToDefault(
+    userId: string,
+    body: { number: string; expiryDate: string },
+  ): Promise<User> {
+    const { number, expiryDate } = body;
 
-      const paymentMethods = foundUser.paymentMethods;
-
-      paymentMethods.forEach((paymentMethod, index) => {
-        if (paymentMethod.number === number && paymentMethod.isDefault) {
-          throw new Error('Payment method is already default');
-        } else {
-          paymentMethods[index] = {
-            ...paymentMethods[index],
-            isDefault: paymentMethod.number === number,
-          };
-        }
-      });
-
-      const res = await this.userModel.findByIdAndUpdate(
-        userId,
-        {
-          $set: { paymentMethods: paymentMethods },
-        },
-        {
-          new: true,
-        },
-      );
-
-      return res;
-    } catch (error) {
-      return error;
+    if (isCardExpired(expiryDate)) {
+      throw new BadRequestException('You can not set expired card as default');
     }
+
+    const foundUser = (await this.userModel.findById(userId)).toObject();
+
+    const paymentMethods = foundUser.paymentMethods;
+
+    paymentMethods.forEach((paymentMethod, index) => {
+      if (paymentMethod.number === number && paymentMethod.isDefault) {
+        throw new BadRequestException('Payment method is already default');
+      } else {
+        paymentMethods[index] = {
+          ...paymentMethods[index],
+          isDefault: paymentMethod.number === number,
+        };
+      }
+    });
+
+    const res = await this.userModel.findByIdAndUpdate(
+      userId,
+      {
+        $set: { paymentMethods: paymentMethods },
+      },
+      {
+        new: true,
+      },
+    );
+
+    return res;
   }
 
   async removePaymentMethod(userId: string, number: string): Promise<User> {
@@ -118,7 +124,7 @@ export class UserService {
           paymentMethod.number === number && paymentMethod.isDefault,
       );
 
-      if (foundPM) {
+      if (foundPM && foundUser.paymentMethods.length !== 1) {
         throw new Error('Default payment method can not be deleted');
       }
 

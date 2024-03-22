@@ -1,10 +1,16 @@
-import { Injectable, MethodNotAllowedException } from '@nestjs/common';
+import {
+  BadRequestException,
+  Injectable,
+  MethodNotAllowedException,
+  NotFoundException,
+} from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import mongoose from 'mongoose';
 import { Purchase } from './purchase.schema';
 import { Status } from './purchase.entity';
 import { User } from 'src/user/user.schema';
 import { Cron } from '@nestjs/schedule';
+import { isCardExpired } from 'src/helpers/api';
 
 @Injectable()
 export class PurchaseService {
@@ -21,10 +27,24 @@ export class PurchaseService {
     private userSchema: mongoose.Model<User>,
   ) {}
 
-  async createPurchase(purchase: Purchase): Promise<Purchase> {
+  async createPurchase(purchase: Purchase, cvc: string): Promise<Purchase> {
     const foundUser = await this.userSchema.findById(purchase.user);
+    const foundDefaultPayment = foundUser.paymentMethods.find(
+      (payment) => payment.isDefault,
+    );
+
+    if (foundDefaultPayment.cvc !== cvc) {
+      throw new BadRequestException('Invalid CVC');
+    }
+
+    if (isCardExpired(foundDefaultPayment.expiryDate)) {
+      throw new BadRequestException(
+        'Credit card is expired, look at Payment Methods section',
+      );
+    }
+
     if (!foundUser.paymentMethods.length) {
-      throw new Error('User has not payment method');
+      throw new BadRequestException('User has not payment method');
     }
 
     const updatedUser = await this.userSchema.findByIdAndUpdate(
@@ -36,7 +56,7 @@ export class PurchaseService {
     );
 
     if (!updatedUser) {
-      throw new Error('User was not found');
+      throw new NotFoundException('User was not found');
     }
 
     const res = await this.purchaseSchema.create(purchase);

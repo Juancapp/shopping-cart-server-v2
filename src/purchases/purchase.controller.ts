@@ -7,6 +7,7 @@ import {
   Patch,
   Post,
   Query,
+  Headers,
 } from '@nestjs/common';
 import { PurchaseService } from './purchase.service';
 import { Purchase } from './purchase.schema';
@@ -34,8 +35,10 @@ export class PurchaseController {
   async createPurchase(
     @Body()
     purchase,
+    @Headers('cvc')
+    cvc: string,
   ): Promise<Purchase> {
-    return await this.purchaseService.createPurchase(purchase);
+    return await this.purchaseService.createPurchase(purchase, cvc);
   }
 
   @Patch('/:id')

@@ -8,7 +8,7 @@ export enum FirstTime {
 
 export type PaymentMethod = {
   number: string;
-  expirationDate: string;
+  expiryDate: string;
   cvc: string;
   isDefault: boolean;
 };

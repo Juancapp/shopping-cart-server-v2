@@ -86,9 +86,9 @@ export class UserController {
   @Put('paymentToDefault/:userId')
   async setItemToDefault(
     @Param('userId') userId: string,
-    @Body() body: { number: string },
+    @Body() body: { number: string; expiryDate: string },
   ) {
-    return this.userService.setPaymentToDefault(userId, body.number);
+    return this.userService.setPaymentToDefault(userId, body);
   }
 
   @Put('removePaymentMethod/:userId')

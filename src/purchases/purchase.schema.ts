@@ -24,6 +24,9 @@ export class Purchase {
 
   @Prop({ default: Date.now })
   createdAt: Date;
+
+  @Prop()
+  cardNumber: string;
 }
 
 export const PurchaseSchema = SchemaFactory.createForClass(Purchase);
