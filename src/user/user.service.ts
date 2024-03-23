@@ -31,43 +31,39 @@ export class UserService {
     userId: string,
     body: PaymentMethod,
   ): Promise<User> {
-    try {
-      const foundUser = (await this.userModel.findById(userId)).toObject();
+    const foundUser = (await this.userModel.findById(userId)).toObject();
 
-      const paymentMethods = foundUser.paymentMethods;
+    const paymentMethods = foundUser.paymentMethods;
 
-      if (paymentMethods.length) {
-        paymentMethods.forEach((paymentMethod, index) => {
-          if (paymentMethod.number === body.number) {
-            throw new Error('Same card already added');
-          } else {
-            if (body.isDefault && body.number !== paymentMethod.number) {
-              paymentMethods[index] = {
-                ...paymentMethods[index],
-                isDefault: false,
-              };
-            }
+    if (paymentMethods.length) {
+      paymentMethods.forEach((paymentMethod, index) => {
+        if (paymentMethod.number === body.number) {
+          throw new BadRequestException('Same card already added');
+        } else {
+          if (body.isDefault && body.number !== paymentMethod.number) {
+            paymentMethods[index] = {
+              ...paymentMethods[index],
+              isDefault: false,
+            };
           }
-        });
-        paymentMethods.push(body);
-      } else {
-        paymentMethods.push({ ...body, isDefault: true });
-      }
-
-      const res = await this.userModel.findByIdAndUpdate(
-        userId,
-        {
-          $set: { paymentMethods: paymentMethods },
-        },
-        {
-          new: true,
-        },
-      );
-
-      return res;
-    } catch (error) {
-      return error;
+        }
+      });
+      paymentMethods.push(body);
+    } else {
+      paymentMethods.push({ ...body, isDefault: true });
     }
+
+    const res = await this.userModel.findByIdAndUpdate(
+      userId,
+      {
+        $set: { paymentMethods: paymentMethods },
+      },
+      {
+        new: true,
+      },
+    );
+
+    return res;
   }
 
   async setPaymentToDefault(
