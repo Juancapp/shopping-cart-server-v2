@@ -158,7 +158,7 @@ export class UserService {
       }
 
       const createdUser = await this.userModel.create({
-        name: name,
+        name: name.toLowerCase(),
         firstTime: FirstTime.TRUE,
       });
 

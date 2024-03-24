@@ -12,7 +12,7 @@ export class UserController {
     @Body()
     user,
   ): Promise<User> {
-    return this.userService.createUser(user);
+    return this.userService.getUser(user);
   }
 
   @Patch('/:id')
