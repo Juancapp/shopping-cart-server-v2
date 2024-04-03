@@ -30,7 +30,7 @@
 
 ## Client side app repository
 
-[Link]([https://github.com/nestjs/nest](https://github.com/Juancapp/shopping-cart-v2)).
+[Link](https://github.com/Juancapp/shopping-cart-v2).
 
 ## Installation
 
